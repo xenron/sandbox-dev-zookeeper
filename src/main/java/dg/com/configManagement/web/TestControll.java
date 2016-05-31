@@ -1,0 +1,41 @@
+package dg.com.configManagement.web;
+
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/tc/dd") 
+public class TestControll {
+
+	@RequestMapping("test.do")
+	public void testM(HttpServletResponse response) {
+		outputData(response,"���Գɹ�");
+		System.out.println("----------test.do-----------");
+	}
+	@RequestMapping("testtwo.do")
+	public void sample(HttpServletResponse response) {
+		outputData(response,"���Գɹ�testtwo.do");
+		System.out.println("--------testtwo.do-------------");
+	}
+	@RequestMapping("testthree.do")
+	public void three(HttpServletResponse response) {
+		outputData(response,"���Գɹ�testthree.do");
+		System.out.println("--------testthree.do-------------");
+	}
+	
+	public void outputData(HttpServletResponse response, String data) {
+		try {
+			response.setContentType("text/html;charset=utf-8");
+			response.getWriter().print(data);
+			response.getWriter().flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+}

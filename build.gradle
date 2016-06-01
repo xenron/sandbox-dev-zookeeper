@@ -83,3 +83,36 @@ eclipse {
     }
   }
 }
+
+//For IDEA IDE only
+idea {
+  /*
+  module {
+    inheritOutputDirs = false
+    outputDir = file('muchBetterOutputDir')
+    testOutputDir = file('muchBetterTestOutputDir')
+  }
+  */
+  /*
+  module.iml.withXml {
+    def attsResource = it.asNode().component.content.sourceFolder.find { it.@url == 'file://$MODULE_DIR$/src/main/resources' }.attributes()
+    attsResource.remove('isTestSource')
+    attsResource.put('type', 'java-resource')
+    def attsTestResource = it.asNode().component.content.sourceFolder.find { it.@url == 'file://$MODULE_DIR$/src/test/resources' }.attributes()
+    attsTestResource.remove('isTestSource')
+    attsTestResource.put('type', 'java-test-resource')
+  }
+  */
+  module.iml.withXml {
+    def node = it.asNode()
+    def content = node.component.find { it.'@name' == 'NewModuleRootManager' }.content[0]
+    content.sourceFolder.each { sourceFolder ->
+      if(sourceFolder.@url?.endsWith('/resources')) {
+        sourceFolder.attributes().with {
+        boolean isTestSource = (remove('isTestSource') == 'true')
+        put('type', isTestSource ? 'java-test-resource' : 'java-resource')
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'scala'
 apply plugin: 'war'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'idea'
@@ -7,6 +8,31 @@ apply plugin: 'jetty'
 // JDK 8
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+        }
+        scala {
+            srcDir 'src/main/scala'
+        }
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+    test {
+        java {
+            srcDir 'src/test/java'
+        }
+        scala {
+            srcDir 'src/test/scala'
+        }
+        resources {
+            srcDir 'src/test/resources'
+        }
+    }
+}
 
 repositories {
     mavenLocal()

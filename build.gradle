@@ -9,6 +9,9 @@ apply plugin: 'jetty'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+compileJava.options.encoding = 'UTF-8'
+compileScala.options.encoding = 'UTF-8'
+
 sourceSets {
     main {
         java {

@@ -8,25 +8,25 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/tc/dd") 
+@RequestMapping("/tc/dd")
 public class TestControll {
 
 	@RequestMapping("test.do")
 	public void testM(HttpServletResponse response) {
-		outputData(response,"���Գɹ�");
+		outputData(response,"测试成功");
 		System.out.println("----------test.do-----------");
 	}
 	@RequestMapping("testtwo.do")
 	public void sample(HttpServletResponse response) {
-		outputData(response,"���Գɹ�testtwo.do");
+		outputData(response,"测试成功testtwo.do");
 		System.out.println("--------testtwo.do-------------");
 	}
 	@RequestMapping("testthree.do")
 	public void three(HttpServletResponse response) {
-		outputData(response,"���Գɹ�testthree.do");
+		outputData(response,"测试成功testthree.do");
 		System.out.println("--------testthree.do-------------");
 	}
-	
+
 	public void outputData(HttpServletResponse response, String data) {
 		try {
 			response.setContentType("text/html;charset=utf-8");

@@ -31,11 +31,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 public class ScanControll {
-	//��ɨ��İ���
+	//被扫描的包名
 	private String scanPath = "";
 	private CuratorFramework client = null;
 	private String connectString = "";
-	//Ӧ����
+	//应用名
 	private String bizCode = "sampleweb";
 
 	public ScanControll(String path, String connectString, String bizcode) {
@@ -52,90 +52,90 @@ public class ScanControll {
 				.namespace("webServiceCenter").build();
 		client.start();
 	}
-	
+
 	/**
-	 * ��ȡָ�����������б���ӷ���ע�����
-	 * ����ע��Ϊcontroll�ͷ����ϵ�requestMapping
+	 * 获取指定包下面所有被添加服务注解的类
+	 * 服务注解为controll和方法上的requestMapping
 	 * @param pack
 	 * @return
 	 */
 	public Set<Class<?>> getClasses(String pack) {
 
-		// ��һ��class��ļ���
+		// 第一个class类的集合
 		Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
-		// �Ƿ�ѭ������
+		// 是否循环迭代
 		boolean recursive = true;
-		// ��ȡ�������� �������滻
+		// 获取包的名字 并进行替换
 		String packageName = pack;
 		String packageDirName = packageName.replace('.', '/');
-		// ����һ��ö�ٵļ��� ������ѭ�����������Ŀ¼�µ�things
+		// 定义一个枚举的集合 并进行循环来处理这个目录下的things
 		Enumeration<URL> dirs;
 		System.out.println("packageDirName=" + packageDirName);
 		try {
 			dirs = Thread.currentThread().getContextClassLoader()
 					.getResources(packageDirName);
-			// ѭ��������ȥ
+			// 循环迭代下去
 			while (dirs.hasMoreElements()) {
-				// ��ȡ��һ��Ԫ��
+				// 获取下一个元素
 				URL url = dirs.nextElement();
 				System.out.println("path=" + url.getPath());
-				// �õ�Э�������
+				// 得到协议的名称
 				String protocol = url.getProtocol();
-				// ��������ļ�����ʽ�����ڷ�������
+				// 如果是以文件的形式保存在服务器上
 				if ("file".equals(protocol)) {
-					System.err.println("file���͵�ɨ��");
-					// ��ȡ��������·��
+					System.err.println("file类型的扫描");
+					// 获取包的物理路径
 					String filePath = URLDecoder.decode(url.getFile(), "UTF-8");
-					// ���ļ��ķ�ʽɨ���������µ��ļ� ����ӵ�������
+					// 以文件的方式扫描整个包下的文件 并添加到集合中
 					findAndAddClassesInPackageByFile(packageName, filePath,
 							recursive, classes);
 				} else if ("jar".equals(protocol)) {
-					// �����jar���ļ�
-					// ����һ��JarFile
-					System.err.println("jar���͵�ɨ��");
+					// 如果是jar包文件
+					// 定义一个JarFile
+					System.err.println("jar类型的扫描");
 					JarFile jar;
 					try {
-						// ��ȡjar
+						// 获取jar
 						jar = ((JarURLConnection) url.openConnection())
 								.getJarFile();
-						// �Ӵ�jar�� �õ�һ��ö����
+						// 从此jar包 得到一个枚举类
 						Enumeration<JarEntry> entries = jar.entries();
-						// ͬ���Ľ���ѭ������
+						// 同样的进行循环迭代
 						while (entries.hasMoreElements()) {
-							// ��ȡjar���һ��ʵ�� ������Ŀ¼ ��һЩjar����������ļ� ��META-INF���ļ�
+							// 获取jar里的一个实体 可以是目录 和一些jar包里的其他文件 如META-INF等文件
 							JarEntry entry = entries.nextElement();
 							String name = entry.getName();
-							// �������/��ͷ��
+							// 如果是以/开头的
 							if (name.charAt(0) == '/') {
-								// ��ȡ������ַ���
+								// 获取后面的字符串
 								name = name.substring(1);
 							}
-							// ���ǰ�벿�ֺͶ���İ�����ͬ
+							// 如果前半部分和定义的包名相同
 							if (name.startsWith(packageDirName)) {
 								int idx = name.lastIndexOf('/');
-								// �����"/"��β ��һ����
+								// 如果以"/"结尾 是一个包
 								if (idx != -1) {
-									// ��ȡ���� ��"/"�滻��"."
+									// 获取包名 把"/"替换成"."
 									packageName = name.substring(0, idx)
 											.replace('/', '.');
 								}
-								// ������Ե�����ȥ ������һ����
+								// 如果可以迭代下去 并且是一个包
 								if ((idx != -1) || recursive) {
-									// �����һ��.class�ļ� ���Ҳ���Ŀ¼
+									// 如果是一个.class文件 而且不是目录
 									if (name.endsWith(".class")
 											&& !entry.isDirectory()) {
-										// ȥ�������".class" ��ȡ����������
+										// 去掉后面的".class" 获取真正的类名
 										String className = name.substring(
 												packageName.length() + 1,
 												name.length() - 6);
 										try {
-											// ��ӵ�classes
+											// 添加到classes
 											classes.add(Class
 													.forName(packageName + '.'
 															+ className));
 										} catch (ClassNotFoundException e) {
 											// log
-											// .error("����û��Զ�����ͼ����� �Ҳ��������.class�ļ�");
+											// .error("添加用户自定义视图类错误 找不到此类的.class文件");
 											e.printStackTrace();
 										}
 									}
@@ -143,7 +143,7 @@ public class ScanControll {
 							}
 						}
 					} catch (IOException e) {
-						// log.error("��ɨ���û�������ͼʱ��jar����ȡ�ļ�����");
+						// log.error("在扫描用户定义视图时从jar包获取文件出错");
 						e.printStackTrace();
 					}
 				}
@@ -156,42 +156,42 @@ public class ScanControll {
 	}
 
 	public void findAndAddClassesInPackageByFile(String packageName,
-			String packagePath, final boolean recursive, Set<Class<?>> classes) {
-		// ��ȡ�˰���Ŀ¼ ����һ��File
+												 String packagePath, final boolean recursive, Set<Class<?>> classes) {
+		// 获取此包的目录 建立一个File
 		File dir = new File(packagePath);
-		// ��������ڻ��� Ҳ����Ŀ¼��ֱ�ӷ���
+		// 如果不存在或者 也不是目录就直接返回
 		if (!dir.exists() || !dir.isDirectory()) {
-			// log.warn("�û�������� " + packageName + " ��û���κ��ļ�");
+			// log.warn("用户定义包名 " + packageName + " 下没有任何文件");
 			return;
 		}
-		// ������� �ͻ�ȡ���µ������ļ� ����Ŀ¼
+		// 如果存在 就获取包下的所有文件 包括目录
 		File[] dirfiles = dir.listFiles(new FileFilter() {
-			// �Զ�����˹��� �������ѭ��(������Ŀ¼) ��������.class��β���ļ�(����õ�java���ļ�)
+			// 自定义过滤规则 如果可以循环(包含子目录) 或则是以.class结尾的文件(编译好的java类文件)
 			public boolean accept(File file) {
 				return (recursive && file.isDirectory())
 						|| (file.getName().endsWith(".class"));
 			}
 		});
-		// ѭ�������ļ�
+		// 循环所有文件
 		for (File file : dirfiles) {
-			// �����Ŀ¼ �����ɨ��
+			// 如果是目录 则继续扫描
 			if (file.isDirectory()) {
 				findAndAddClassesInPackageByFile(
 						packageName + "." + file.getName(),
 						file.getAbsolutePath(), recursive, classes);
 			} else {
-				// �����java���ļ� ȥ�������.class ֻ��������
+				// 如果是java类文件 去掉后面的.class 只留下类名
 				String className = file.getName().substring(0,
 						file.getName().length() - 6);
 				try {
-					// ��ӵ�������ȥ
+					// 添加到集合中去
 					// classes.add(Class.forName(packageName + '.' +
 					// className));
-					// �����ظ�ͬѧ�����ѣ�������forName��һЩ���ã��ᴥ��static������û��ʹ��classLoader��load�ɾ�
+					// 经过回复同学的提醒，这里用forName有一些不好，会触发static方法，没有使用classLoader的load干净
 					classes.add(Thread.currentThread().getContextClassLoader()
 							.loadClass(packageName + '.' + className));
 				} catch (ClassNotFoundException e) {
-					// log.error("����û��Զ�����ͼ����� �Ҳ��������.class�ļ�");
+					// log.error("添加用户自定义视图类错误 找不到此类的.class文件");
 					e.printStackTrace();
 				}
 			}
@@ -200,22 +200,22 @@ public class ScanControll {
 
 	public void init() {
 		try {
-			System.out.println("ɨ���ʼ��------");
-			//��ʼ��zk�ͻ���
+			System.out.println("扫描初始化------");
+			//初始化zk客户端
 			buildZKclient();
 			registBiz();
-			
-			//ɨ������action��ͷ���
+
+			//扫描所有action类和方法
 			Set classes = getClasses(scanPath);
 			if (classes.size() < 1)
 				return;
-			
-			//ͨ��ע��õ������ַ
+
+			//通过注解得到服务地址
 			List<String> services = getServicePath(classes);
 			for (String s : services)
 				System.out.println("service=" + s);
 			System.out.println("------------------size=");
-			//�ѷ���ע�ᵽzk
+			//把服务注册到zk
 			registBizServices(services);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -225,10 +225,10 @@ public class ScanControll {
 	private void registBiz() {
 		try {
 			if (client.checkExists().forPath("/" + bizCode) == null) {
-			client.create().creatingParentsIfNeeded()
-					.withMode(CreateMode.PERSISTENT)
-					.withACL(Ids.OPEN_ACL_UNSAFE)
-					.forPath("/" + bizCode, (bizCode + "�ṩ�ķ����б�").getBytes());
+				client.create().creatingParentsIfNeeded()
+						.withMode(CreateMode.PERSISTENT)
+						.withACL(Ids.OPEN_ACL_UNSAFE)
+						.forPath("/" + bizCode, (bizCode + "提供的服务列表").getBytes());
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

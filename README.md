@@ -1,1 +1,3 @@
-# sandbox-zookeeper
+# sandbox-dev-zookeeper
+mvn clean package
+

@@ -15,8 +15,6 @@ public class WatcherExample implements Watcher {
 		System.out.println("watcher="+this.getClass().getName());
 		System.out.println("path="+event.getPath());
 		System.out.println("eventType="+event.getType().name());
-		
-	
 	}
 	
 	public String getZkpath() {
@@ -31,7 +29,7 @@ public class WatcherExample implements Watcher {
 		WatcherExample  wx = new WatcherExample();
 		try {
 			ZooKeeper	zk = new ZooKeeper(wx.getZkpath(),10000, wx);
-			zk.getChildren("/node7",true);
+			zk.getChildren("/node1",true);
 			Thread.sleep(300000);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
